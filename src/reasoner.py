@@ -12,9 +12,10 @@ import parser
 
 logger = logging.getLogger(__name__)
 
+
 def evaluate(matrix: dict, traces: list) -> dict:
-    """Takes a behavioral profile and turns it into a list of
-    LTL or RegExp constraints.
+    """Takes a behavioral profile and evaluates traces against
+    its RegExp constraints.
 
     Args:
         matrix (dict): Matrix of the behavioral profile
@@ -23,7 +24,25 @@ def evaluate(matrix: dict, traces: list) -> dict:
     Returns:
         Dictionary that labels all traces as True (satisfied) or False (violated)
     """
-    # TODO You need to implement this. Remove the TODO afterwards.
+
+    # Generate RegExp constraints and compile them into patterns
+    constraints = parser.parse(matrix, "RegExp")
+    patterns = [re.compile(constraint) for constraint in constraints]
+
+    results = {}
+
+    # Evaluate each trace against all constraints
+    for trace in traces:
+        # Convert the trace into a single string
+        trace_string = "".join(trace)
+
+        # A trace is valid only if all constraints are satisfied
+        results[trace_string] = all(
+            pattern.search(trace_string) is not None for pattern in patterns
+        )
+
+    return results
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
@@ -51,4 +70,3 @@ if __name__ == "__main__":
 
     logger.info("Evaluation complete:")
     print(constraints)
-
